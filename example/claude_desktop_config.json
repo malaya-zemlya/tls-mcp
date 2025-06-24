@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "tls-mcp-server": {
+      "command": "/path/to/your/tls-mcp/venv/bin/python",
+      "args": [
+        "/path/to/your/tls-mcp/tls_mcp_server/main.py"
+      ],
+      "env": {
+        "PYTHONPATH": "/path/to/your/tls-mcp"
+      }
+    }
+  }
+}

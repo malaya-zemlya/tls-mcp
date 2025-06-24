@@ -1,0 +1,68 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tls-mcp-server"
+version = "0.2.0"
+description = "MCP server for TLS certificate analysis using OpenSSL and zlint"
+authors = [{name = "Malaya Zemlya", email = "mz@example.com"}]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.13"
+keywords = ["mcp", "tls", "certificates", "security", "openssl", "zlint"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+]
+
+# Dependencies - minimal and stable
+dependencies = [
+    "mcp>=1.0.0",           # MCP Python SDK - core library for MCP servers
+    "cryptography>=42.0.0",  # Handles all certificate operations (parsing, validation, etc.)
+]
+
+# Optional dependencies for development
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",  # For testing async functions
+    "pytest-mock>=3.12.0",     # For mocking in tests
+    "black>=24.0.0",
+    "ruff>=0.3.0",        # Modern linter/formatter, faster than flake8
+    "mypy>=1.8.0",
+]
+
+# Entry point - how to run our MCP server
+[project.scripts]
+tls-mcp-server = "tls_mcp_server.main:main"
+
+# Additional tool configurations
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = [
+    "-v",
+    "--strict-markers",
+    "--tb=short"
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"') - requires internet and external tools",
+    "integration: marks tests as integration tests"
+]
+
+# Tool configurations
+[tool.black]
+line-length = 88
+target-version = ['py313']
+
+[tool.ruff]
+target-version = "py313"
+line-length = 88
+
+[tool.mypy]
+python_version = "3.13"
+warn_return_any = true
+warn_unused_configs = true
