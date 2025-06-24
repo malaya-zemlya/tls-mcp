@@ -6,6 +6,7 @@ A **Model Context Protocol (MCP)** server that provides a unified, user-friendly
 
 - **All-in-One Interface**: Single tool with flexible options for any certificate analysis need
 - **Smart Analysis**: Automatically uses OpenSSL when available, falls back to Python cryptography
+- **Certificate Expiration Monitoring**: Automatic expiration checking with human-friendly warnings
 - **Cipher Suite Analysis**: Comprehensive TLS cipher suite and version support testing
 - **Security Grading**: Automated security assessment with grades from A+ to F
 - **Flexible Options**: Choose quick/detailed analysis, include/exclude PEM, enable/disable linting
@@ -30,6 +31,12 @@ Fetches and analyzes TLS certificates with flexible options - no need to copy PE
 **Analysis Options:**
 - **Quick Analysis**: Essential certificate info (subject, issuer, validity, SANs)
 - **Detailed Analysis**: Full certificate details including extensions and key info
+- **Expiration Monitoring**: Automatic expiration checking with smart warnings:
+  - ✅ Valid certificates show time until expiration
+  - 🟡 Certificates expiring within 30 days get yellow warning
+  - ⚠️ Certificates expiring within 7 days get urgent warning
+  - 🔴 Expired certificates show time since expiration
+  - ⏳ Future-valid certificates show time until validity
 - **OpenSSL vs Cryptography**: Automatically uses OpenSSL if available, falls back to Python cryptography
 
 **Examples:**
@@ -171,10 +178,11 @@ pytest tests/test_google_integration.py -v
 ### Test Coverage
 - **Unit Tests**: Test the new unified interface with mocked dependencies
 - **Cipher Analysis Tests**: Test cipher categorization, TLS version detection, and security grading
+- **Expiration Check Tests**: Test certificate validity checking, duration formatting, and timezone handling
 - **Basic Integration Tests**: Test server registration and tool options
 - **Real-World Integration Tests**: Test full workflow with live Google certificate  
 - **Error Handling**: Test various failure scenarios
-- **Current Coverage**: 23 passing tests with comprehensive coverage
+- **Current Coverage**: 34 passing tests with comprehensive coverage
 
 ## 📁 Project Structure
 
@@ -184,10 +192,11 @@ tls-mcp/
 │   ├── __init__.py          # Package initialization
 │   └── main.py              # MCP server implementation
 ├── tests/
-│   ├── __init__.py            # Test package
-│   ├── test_mcp_server.py     # Unit tests
-│   ├── test_cipher_analysis.py # Cipher analysis tests
-│   └── test_integration.py    # Integration tests
+│   ├── __init__.py              # Test package
+│   ├── test_mcp_server.py       # Unit tests
+│   ├── test_cipher_analysis.py  # Cipher analysis tests
+│   ├── test_expiration_check.py # Expiration checking tests
+│   └── test_integration.py      # Integration tests
 ├── pyproject.toml           # Project configuration
 ├── pytest.ini              # Test configuration
 └── README.md               # This file
@@ -251,5 +260,6 @@ python tls_mcp_server/main.py
 
 ## 🏷️ Version History
 
+- **v0.2.1**: Added certificate expiration monitoring with human-friendly warnings and timezone handling
 - **v0.2.0**: Major interface redesign with unified `fetch_certificate` tool, OpenSSL integration, cipher suite analysis, security grading
 - **v0.1.0**: Initial release with basic certificate fetching, analysis, and linting
