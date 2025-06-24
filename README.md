@@ -120,22 +120,22 @@ After configuration, restart Claude Desktop and try these commands:
 
 ### Compare Multiple Certificates
 ```
-"Compare the certificates from google.com and github.com - show me their key differences"
+"Use the TLS certificate tool to analyze both google.com and github.com, then compare their key differences"
 ```
 
 ### Security Assessment
 ```
-"Check if example.com uses secure certificate practices with full analysis and linting"
+"Use the TLS certificate tool to check if example.com uses secure certificate practices with full analysis and linting"
 ```
 
 ### Cipher Suite Analysis
 ```
-"Analyze the cipher suites supported by github.com and give me a security assessment"
+"Use the TLS certificate tool to analyze the cipher suites supported by github.com and give me a security assessment"
 ```
 
 ### Comprehensive Security Analysis
 ```
-"Do a full security analysis of google.com including cipher suites, TLS versions, and certificate compliance"
+"Use the TLS certificate tool to do a full security analysis of google.com including cipher suites, TLS versions, and certificate compliance"
 ```
 
 **Key Benefits:**
