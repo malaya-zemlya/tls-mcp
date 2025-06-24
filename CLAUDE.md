@@ -77,6 +77,8 @@ This is a **Model Context Protocol (MCP) server** that provides TLS certificate 
 
 **Connection Termination**: All OpenSSL commands include `input='\n'` to immediately close connections and prevent hanging.
 
+**Certificate Expiration Monitoring**: All certificate analysis automatically includes expiration checking with UTC timezone handling. Uses human-friendly duration formatting (e.g., "62 days", "3 hours") and provides smart warnings based on urgency.
+
 ## Prerequisites
 
 - **Python 3.13+** (strict requirement)
@@ -116,6 +118,8 @@ The server requires configuration in Claude Desktop at:
 **Unit Tests** (`test_mcp_server.py`): Mock external dependencies, test tool interface and parameter handling.
 
 **Cipher Analysis Tests** (`test_cipher_analysis.py`): Test security categorization, TLS version detection, and grading algorithms with mocked subprocess calls.
+
+**Expiration Check Tests** (`test_expiration_check.py`): Test certificate validity checking, duration formatting, timezone handling, and various expiration scenarios.
 
 **Integration Tests** (`test_integration.py`): Test MCP server registration and basic functionality.
 

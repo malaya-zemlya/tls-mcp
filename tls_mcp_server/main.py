@@ -12,6 +12,7 @@ import logging
 import ssl
 import socket
 import subprocess
+from datetime import datetime, timezone
 from typing import Dict, Any, Optional
 from pathlib import Path
 
@@ -29,6 +30,54 @@ logger = logging.getLogger(__name__)
 
 # Create the MCP server instance
 server = Server("tls-mcp-server")
+
+def _format_duration_human_friendly(total_seconds: int) -> str:
+    """Format a duration in seconds to human-friendly format, using the largest meaningful unit."""
+    if total_seconds < 0:
+        return _format_duration_human_friendly(-total_seconds)
+    
+    # Convert to different units
+    minutes = total_seconds // 60
+    hours = total_seconds // 3600
+    days = total_seconds // 86400
+    years = total_seconds // (365 * 86400)
+    
+    # Choose the most appropriate unit (round to largest meaningful unit)
+    if years >= 1:
+        return f"{years} year{'s' if years != 1 else ''}"
+    elif days >= 1:
+        return f"{days} day{'s' if days != 1 else ''}"
+    elif hours >= 1:
+        return f"{hours} hour{'s' if hours != 1 else ''}"
+    elif minutes >= 1:
+        return f"{minutes} minute{'s' if minutes != 1 else ''}"
+    else:
+        return f"{total_seconds} second{'s' if total_seconds != 1 else ''}"
+
+def _check_certificate_validity(not_before_utc: datetime, not_after_utc: datetime) -> str:
+    """Check certificate validity and return human-friendly status message."""
+    now_utc = datetime.now(timezone.utc)
+    
+    if now_utc < not_before_utc:
+        # Certificate is not yet valid
+        seconds_until_valid = int((not_before_utc - now_utc).total_seconds())
+        duration = _format_duration_human_friendly(seconds_until_valid)
+        return f"⏳ This certificate will become valid in {duration}"
+    elif now_utc > not_after_utc:
+        # Certificate has expired
+        seconds_since_expired = int((now_utc - not_after_utc).total_seconds())
+        duration = _format_duration_human_friendly(seconds_since_expired)
+        return f"🔴 This certificate has expired {duration} ago"
+    else:
+        # Certificate is currently valid
+        seconds_until_expiry = int((not_after_utc - now_utc).total_seconds())
+        duration = _format_duration_human_friendly(seconds_until_expiry)
+        if seconds_until_expiry <= 7 * 86400:  # 7 days
+            return f"⚠️  This certificate expires in {duration} (expiring soon!)"
+        elif seconds_until_expiry <= 30 * 86400:  # 30 days
+            return f"🟡 This certificate expires in {duration}"
+        else:
+            return f"✅ This certificate expires in {duration}"
 
 @server.list_tools()
 async def list_tools() -> list[Tool]:
@@ -214,6 +263,15 @@ async def _analyze_with_openssl(cert_pem: str, level: str) -> str:
             output = "🔧 Analysis (OpenSSL):\n"
             output += "-" * 30 + "\n"
             output += result.stdout
+            
+            # Add expiration check using cryptography (since OpenSSL output is text)
+            try:
+                cert = x509.load_pem_x509_certificate(cert_pem.encode())
+                validity_status = _check_certificate_validity(cert.not_valid_before_utc, cert.not_valid_after_utc)
+                output += f"\n{validity_status}\n"
+            except Exception:
+                pass  # If certificate parsing fails, just skip the expiration check
+            
             return output
         else:
             # Fall back to cryptography if OpenSSL fails
@@ -236,6 +294,11 @@ async def _analyze_with_cryptography(cert_pem: str, level: str) -> str:
             output += f"Issuer: {cert.issuer.rfc4514_string()}\n"
             output += f"Valid From: {cert.not_valid_before_utc.isoformat()}\n"
             output += f"Valid Until: {cert.not_valid_after_utc.isoformat()}\n"
+            
+            # Add certificate validity status
+            validity_status = _check_certificate_validity(cert.not_valid_before_utc, cert.not_valid_after_utc)
+            output += f"{validity_status}\n"
+            
             output += f"Serial Number: {cert.serial_number}\n"
             
             # Add SANs if present
@@ -259,6 +322,11 @@ async def _analyze_with_cryptography(cert_pem: str, level: str) -> str:
             output += f"Version: {cert.version.name}\n"
             output += f"Valid From: {cert.not_valid_before_utc.isoformat()}\n"
             output += f"Valid Until: {cert.not_valid_after_utc.isoformat()}\n"
+            
+            # Add certificate validity status
+            validity_status = _check_certificate_validity(cert.not_valid_before_utc, cert.not_valid_after_utc)
+            output += f"{validity_status}\n"
+            
             output += f"Signature Algorithm: {cert.signature_algorithm_oid._name}\n"
             
             # Public key info
