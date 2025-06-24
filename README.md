@@ -1,6 +1,7 @@
 # TLS MCP Server
 
 A **Model Context Protocol (MCP)** server that provides a unified, user-friendly tool for TLS certificate analysis. No more copying PEM data between functions - everything happens in one clean interface!
+This tool has been written entirely via Claude Code, as a fun learning project.
 
 ## 🚀 Features
 
